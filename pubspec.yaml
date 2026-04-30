@@ -1,0 +1,59 @@
+name: gimie
+description: Gimie - Connecting people through common wishes
+publish_to: 'none'
+version: 1.0.1+4
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Firebase
+  firebase_core: ^4.7.0
+  firebase_auth: ^6.4.0
+  firebase_storage: ^13.3.0
+  cloud_firestore: ^6.3.0
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # HTTP & API
+  http: ^1.2.0
+  dio: ^5.4.0
+  
+  # UI & Utils
+  url_launcher: ^6.2.3
+  image_picker: ^1.0.7
+  cached_network_image: ^3.3.1
+  intl: ^0.19.0
+  shared_preferences: ^2.2.2
+  
+  # Icons
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+  
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Raleway-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Raleway-SemiBold.ttf
+          weight: 600
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+          weight: 400
