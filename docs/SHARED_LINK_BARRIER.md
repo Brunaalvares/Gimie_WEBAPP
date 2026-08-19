@@ -118,11 +118,11 @@ As URLs da App Store e Play Store estão configuradas em:
 `lib/widgets/app_download_modal.dart`:
 
 ```dart
-static const String _appStoreUrl = 'https://apps.apple.com/app/gimie/id123456789';
-static const String _playStoreUrl = 'https://play.google.com/store/apps/details?id=com.gimie.app';
+static const String _appStoreUrl = 'https://apps.apple.com/br/app/gimie/id6768790198';
+static const String _playStoreUrl = 'https://play.google.com/apps/test/com.gimie.app/7';
 ```
 
-**⚠️ IMPORTANTE**: Atualize estas URLs com os links reais quando o app for publicado nas lojas!
+**✅ URLs configuradas e prontas para uso!**
 
 ## Fluxo do Usuário
 
