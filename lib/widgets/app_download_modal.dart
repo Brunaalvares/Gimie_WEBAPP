@@ -12,9 +12,9 @@ class AppDownloadModal extends StatelessWidget {
     this.onDismiss,
   });
 
-  // URLs das lojas (substitua com as URLs reais quando publicar o app)
-  static const String _appStoreUrl = 'https://apps.apple.com/app/gimie/id123456789';
-  static const String _playStoreUrl = 'https://play.google.com/store/apps/details?id=com.gimie.app';
+  // URLs das lojas
+  static const String _appStoreUrl = 'https://apps.apple.com/br/app/gimie/id6768790198';
+  static const String _playStoreUrl = 'https://play.google.com/apps/test/com.gimie.app/7';
   static const String _appName = 'Gimie';
 
   Future<void> _openStore(BuildContext context, bool isIOS) async {
