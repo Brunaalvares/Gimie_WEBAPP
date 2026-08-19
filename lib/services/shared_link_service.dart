@@ -1,0 +1,96 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html show window;
+
+/// Serviço para detectar e gerenciar acesso via links compartilhados
+class SharedLinkService {
+  static final SharedLinkService _instance = SharedLinkService._internal();
+  static SharedLinkService get instance => _instance;
+
+  SharedLinkService._internal();
+
+  bool _isSharedAccess = false;
+  String? _sharedFolderId;
+  String? _sharedUserId;
+
+  /// Verifica se o acesso atual é através de um link compartilhado
+  bool get isSharedAccess => _isSharedAccess;
+
+  /// ID da pasta compartilhada (se aplicável)
+  String? get sharedFolderId => _sharedFolderId;
+
+  /// ID do usuário que compartilhou (se aplicável)
+  String? get sharedUserId => _sharedUserId;
+
+  /// Inicializa o serviço verificando query parameters na URL
+  void initialize() {
+    if (!kIsWeb) {
+      _isSharedAccess = false;
+      return;
+    }
+
+    try {
+      final uri = Uri.parse(html.window.location.href);
+      
+      // Verifica se existe o parâmetro 'shared' ou 'from'
+      final isShared = uri.queryParameters.containsKey('shared') || 
+                       uri.queryParameters.containsKey('from');
+      
+      if (isShared) {
+        _isSharedAccess = true;
+        _sharedFolderId = uri.queryParameters['folder'];
+        _sharedUserId = uri.queryParameters['user'] ?? uri.queryParameters['from'];
+        
+        debugPrint('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
+      } else {
+        _isSharedAccess = false;
+      }
+    } catch (e) {
+      debugPrint('Error initializing SharedLinkService: $e');
+      _isSharedAccess = false;
+    }
+  }
+
+  /// Marca manualmente como acesso compartilhado (útil para testes ou deep links)
+  void setSharedAccess({
+    required bool isShared,
+    String? folderId,
+    String? userId,
+  }) {
+    _isSharedAccess = isShared;
+    _sharedFolderId = folderId;
+    _sharedUserId = userId;
+  }
+
+  /// Limpa o estado de acesso compartilhado
+  void clear() {
+    _isSharedAccess = false;
+    _sharedFolderId = null;
+    _sharedUserId = null;
+  }
+
+  /// Retorna a URL atual com os parâmetros de compartilhamento
+  String getCurrentShareUrl() {
+    if (!kIsWeb) return '';
+    return html.window.location.href;
+  }
+
+  /// Gera uma URL de compartilhamento para uma pasta
+  String generateShareUrl({
+    required String userId,
+    required String folderName,
+    String? baseUrl,
+  }) {
+    final base = baseUrl ?? (kIsWeb ? html.window.location.origin : 'https://gimie.site');
+    final encodedFolder = Uri.encodeComponent(folderName);
+    final encodedUser = Uri.encodeComponent(userId);
+    
+    return '$base/?shared=true&folder=$encodedFolder&user=$encodedUser';
+  }
+}
+
+void debugPrint(String message) {
+  if (kIsWeb) {
+    // ignore: avoid_print
+    print(message);
+  }
+}

@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
 import '../models/product_model.dart';
+import '../services/shared_link_service.dart';
+import '../widgets/app_download_modal.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -168,6 +170,20 @@ class _ProductCard extends StatelessWidget {
       return;
     }
 
+    // Verifica se o acesso é via link compartilhado
+    final sharedLinkService = SharedLinkService.instance;
+    if (sharedLinkService.isSharedAccess) {
+      // Mostra o modal de download do app
+      if (context.mounted) {
+        await AppDownloadModal.show(
+          context,
+          productUrl: product.url,
+        );
+      }
+      return;
+    }
+
+    // Se não for acesso compartilhado, abre normalmente
     try {
       final externalOpened = await launchUrl(
         uri,

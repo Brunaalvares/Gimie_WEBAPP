@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/share_service.dart';
+import '../services/shared_link_service.dart';
 import '../services/api_service.dart';
 import '../services/scraping_service.dart';
 import '../utils/debug_helper.dart';
+import '../widgets/app_download_modal.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AddProductScreen extends StatefulWidget {
@@ -576,6 +578,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
       return;
     }
 
+    // Verifica se o acesso é via link compartilhado
+    final sharedLinkService = SharedLinkService.instance;
+    if (sharedLinkService.isSharedAccess) {
+      // Mostra o modal de download do app
+      if (mounted) {
+        await AppDownloadModal.show(
+          context,
+          productUrl: targetUrl,
+        );
+      }
+      return;
+    }
+
+    // Se não for acesso compartilhado, abre normalmente
     try {
       final externalOpened = await launchUrl(
         uri,

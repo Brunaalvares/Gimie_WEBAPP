@@ -7,6 +7,7 @@ import 'providers/product_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/scraping_provider.dart';
 import 'services/share_service.dart';
+import 'services/shared_link_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,14 @@ void main() async {
     debugPrint('Share Service initialized successfully');
   } catch (e) {
     debugPrint('Share Service initialization error: $e');
+  }
+
+  // Initialize Shared Link Service
+  try {
+    SharedLinkService.instance.initialize();
+    debugPrint('Shared Link Service initialized successfully');
+  } catch (e) {
+    debugPrint('Shared Link Service initialization error: $e');
   }
   
   runApp(const GimieApp());
