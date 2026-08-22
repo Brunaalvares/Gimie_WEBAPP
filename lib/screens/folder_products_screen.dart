@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/product_model.dart';
@@ -46,6 +47,66 @@ class _FolderProductsScreenState extends State<FolderProductsScreen> {
     }
 
     return Uri.tryParse('https://$normalized');
+  }
+
+  Future<void> _shareFolder(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.resolvedUserId;
+
+    if (userId == null || userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Você precisa estar logado para compartilhar pastas'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Gera a URL de compartilhamento
+      final shareUrl = SharedLinkService.instance.generateShareUrl(
+        userId: userId,
+        folderName: widget.categoryName,
+      );
+
+      // Copia para a área de transferência
+      await Clipboard.setData(ClipboardData(text: shareUrl));
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Link copiado! Compartilhe com seus amigos',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao gerar link: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _openProductLink(BuildContext context, String url) async {
@@ -318,6 +379,14 @@ class _FolderProductsScreenState extends State<FolderProductsScreen> {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          if (widget.allowDelete) // Só mostra se for a própria pasta do usuário
+            IconButton(
+              icon: const Icon(Icons.share, color: Color(0xFF8B7FB8)),
+              onPressed: () => _shareFolder(context),
+              tooltip: 'Compartilhar pasta',
+            ),
+        ],
       ),
       floatingActionButton: widget.allowDelete
           ? FloatingActionButton.extended(

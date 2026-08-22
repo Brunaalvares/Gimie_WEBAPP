@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../models/product_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
 import '../services/firebase_service.dart';
+import '../services/shared_link_service.dart';
 import 'follow_users_screen.dart';
 import 'follow_list_screen.dart';
 import 'folder_products_screen.dart';
@@ -331,6 +333,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: success ? Colors.green : Colors.red,
       ),
     );
+  }
+
+  Future<void> _shareFolder(String categoryName) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userId = authProvider.resolvedUserId;
+
+    if (userId == null || userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Você precisa estar logado para compartilhar pastas'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Gera a URL de compartilhamento
+      final shareUrl = SharedLinkService.instance.generateShareUrl(
+        userId: userId,
+        folderName: categoryName,
+      );
+
+      // Copia para a área de transferência
+      await Clipboard.setData(ClipboardData(text: shareUrl));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Link copiado! Compartilhe com seus amigos',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao gerar link: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _deleteFolder({
@@ -853,9 +915,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         categoryName: category,
                                         categoryProducts: categoryProducts,
                                       );
+                                    } else if (value == 'share') {
+                                      _shareFolder(category);
                                     }
                                   },
                                   itemBuilder: (context) => const [
+                                    PopupMenuItem<String>(
+                                      value: 'share',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.share, size: 20, color: Color(0xFF8B7FB8)),
+                                          SizedBox(width: 8),
+                                          Text('Compartilhar pasta'),
+                                        ],
+                                      ),
+                                    ),
                                     PopupMenuItem<String>(
                                       value: 'rename',
                                       child: Text('Renomear pasta'),
