@@ -80,11 +80,23 @@ class SharedLinkService {
     required String folderName,
     String? baseUrl,
   }) {
-    final base = baseUrl ?? (kIsWeb ? html.window.location.origin : 'https://gimie.site');
-    final encodedFolder = Uri.encodeComponent(folderName);
-    final encodedUser = Uri.encodeComponent(userId);
-    
-    return '$base/?shared=true&folder=$encodedFolder&user=$encodedUser';
+    try {
+      debugPrint('generateShareUrl - userId: $userId, folderName: $folderName');
+      
+      final base = baseUrl ?? (kIsWeb ? html.window.location.origin : 'https://gimie-launch.web.app');
+      debugPrint('Base URL: $base');
+      
+      final encodedFolder = Uri.encodeComponent(folderName);
+      final encodedUser = Uri.encodeComponent(userId);
+      
+      final url = '$base/?shared=true&folder=$encodedFolder&user=$encodedUser';
+      debugPrint('Generated URL: $url');
+      
+      return url;
+    } catch (e) {
+      debugPrint('Error in generateShareUrl: $e');
+      rethrow;
+    }
   }
 }
 

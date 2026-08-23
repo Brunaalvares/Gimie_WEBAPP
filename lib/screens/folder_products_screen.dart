@@ -54,33 +54,59 @@ class _FolderProductsScreenState extends State<FolderProductsScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userId = authProvider.resolvedUserId;
 
+    // Debug: Verificar valores
+    debugPrint('=== Share Folder Debug ===');
+    debugPrint('UserId: $userId');
+    debugPrint('Category Name: ${widget.categoryName}');
+    debugPrint('Context mounted: ${context.mounted}');
+
     if (userId == null || userId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Você precisa estar logado para compartilhar pastas'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Você precisa estar logado para compartilhar pastas'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (widget.categoryName.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nome da pasta inválido'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
       return;
     }
 
     try {
       // Gera a URL de compartilhamento
+      debugPrint('Gerando URL...');
       final shareUrl = SharedLinkService.instance.generateShareUrl(
         userId: userId,
         folderName: widget.categoryName,
       );
+      debugPrint('URL gerada: $shareUrl');
 
       // Mostra dialog com opção de copiar
       if (context.mounted) {
         await ShareLinkDialog.show(context, shareUrl);
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('Erro ao compartilhar: $e');
+      debugPrint('Stack trace: $stackTrace');
+      
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro ao gerar link: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
