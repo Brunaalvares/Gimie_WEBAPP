@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
 import '../services/firebase_service.dart';
 import '../services/shared_link_service.dart';
+import '../widgets/share_link_dialog.dart';
 import 'follow_users_screen.dart';
 import 'follow_list_screen.dart';
 import 'folder_products_screen.dart';
@@ -356,32 +357,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         folderName: categoryName,
       );
 
-      // Copia para a área de transferência
-      await Clipboard.setData(ClipboardData(text: shareUrl));
-
+      // Mostra dialog com opção de copiar
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Link copiado! Compartilhe com seus amigos',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
+        await ShareLinkDialog.show(context, shareUrl);
       }
     } catch (e) {
       if (mounted) {
