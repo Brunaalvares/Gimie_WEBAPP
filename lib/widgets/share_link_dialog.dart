@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Dialog para compartilhar link com fallback manual
-class ShareLinkDialog extends StatelessWidget {
+class ShareLinkDialog extends StatefulWidget {
   final String shareUrl;
 
   const ShareLinkDialog({
@@ -10,13 +10,22 @@ class ShareLinkDialog extends StatelessWidget {
     required this.shareUrl,
   });
 
-  Future<void> _copyToClipboard(BuildContext context) async {
+  @override
+  State<ShareLinkDialog> createState() => _ShareLinkDialogState();
+}
+
+class _ShareLinkDialogState extends State<ShareLinkDialog> {
+  bool _copied = false;
+
+  Future<void> _copyToClipboard() async {
     try {
-      await Clipboard.setData(ClipboardData(text: shareUrl));
-      if (context.mounted) {
+      await Clipboard.setData(ClipboardData(text: widget.shareUrl));
+      setState(() => _copied = true);
+      
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
+          const SnackBar(
+            content: Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 8),
@@ -24,12 +33,12 @@ class ShareLinkDialog extends StatelessWidget {
               ],
             ),
             backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
+            duration: Duration(seconds: 2),
           ),
         );
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Não foi possível copiar automaticamente. Copie manualmente.'),
