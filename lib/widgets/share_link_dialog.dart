@@ -59,45 +59,71 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
           fontWeight: FontWeight.w600,
         ),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Compartilhe este link com seus amigos:',
-            style: TextStyle(
-              fontFamily: 'Roboto',
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: SelectableText(
-              shareUrl,
-              style: const TextStyle(
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Compartilhe este link com seus amigos:',
+              style: TextStyle(
                 fontFamily: 'Roboto',
-                fontSize: 12,
-                color: Colors.blue,
+                fontSize: 14,
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Toque no link acima para selecionar e copiar manualmente',
-            style: TextStyle(
-              fontFamily: 'Roboto',
-              fontSize: 11,
-              color: Colors.grey[600],
-              fontStyle: FontStyle.italic,
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: SelectableText(
+                widget.shareUrl,
+                style: const TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 12,
+                  color: Colors.blue,
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'Toque no link acima para selecionar e copiar manualmente',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 11,
+                color: Colors.grey[600],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            if (_copied) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green[50],
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.green[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green[700], size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Link copiado!',
+                      style: TextStyle(
+                        color: Colors.green[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -105,9 +131,7 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
           child: const Text('Fechar'),
         ),
         ElevatedButton.icon(
-          onPressed: () async {
-            await _copyToClipboard(context);
-          },
+          onPressed: _copyToClipboard,
           icon: const Icon(Icons.copy, size: 18),
           label: const Text('Copiar Link'),
           style: ElevatedButton.styleFrom(
@@ -118,6 +142,7 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
       ],
     );
   }
+}
 
   /// Mostra o dialog de compartilhamento
   static Future<void> show(BuildContext context, String shareUrl) {
