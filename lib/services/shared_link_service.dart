@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 // Conditional import for web
 import 'dart:html' as html if (dart.library.io) 'dart:io';
 
@@ -41,12 +41,12 @@ class SharedLinkService {
         _sharedFolderId = uri.queryParameters['folder'];
         _sharedUserId = uri.queryParameters['user'] ?? uri.queryParameters['from'];
         
-        debugPrintWeb('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
+        _debugPrint('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
       } else {
         _isSharedAccess = false;
       }
     } catch (e) {
-      debugPrint('Error initializing SharedLinkService: $e');
+      _debugPrint('Error initializing SharedLinkService: $e');
       _isSharedAccess = false;
     }
   }
@@ -151,7 +151,7 @@ class SharedLinkService {
 }
 
 // Custom debug print for web
-void debugPrintWeb(String message) {
+void _debugPrint(String message) {
   if (kIsWeb) {
     // ignore: avoid_print
     print('[SharedLinkService] $message');
