@@ -150,9 +150,10 @@ class SharedLinkService {
   }
 }
 
-void debugPrint(String message) {
+// Custom debug print for web
+void debugPrintWeb(String message) {
   if (kIsWeb) {
     // ignore: avoid_print
-    print(message);
+    print('[SharedLinkService] $message');
   }
 }
