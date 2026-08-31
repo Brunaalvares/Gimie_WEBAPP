@@ -40,12 +40,12 @@ class SharedLinkService {
         _sharedFolderId = uri.queryParameters['folder'];
         _sharedUserId = uri.queryParameters['user'] ?? uri.queryParameters['from'];
         
-        _debugPrint('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
+        debugPrint('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
       } else {
         _isSharedAccess = false;
       }
     } catch (e) {
-      _debugPrint('Error initializing SharedLinkService: $e');
+      debugPrint('Error initializing SharedLinkService: $e');
       _isSharedAccess = false;
     }
   }
