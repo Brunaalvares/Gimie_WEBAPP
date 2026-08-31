@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html show window;
+// Conditional import for web
+import 'dart:html' as html if (dart.library.io) 'dart:io';
 
 /// Serviço para detectar e gerenciar acesso via links compartilhados
 class SharedLinkService {
