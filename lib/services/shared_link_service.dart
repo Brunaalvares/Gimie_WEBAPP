@@ -81,21 +81,70 @@ class SharedLinkService {
     String? baseUrl,
   }) {
     try {
-      debugPrint('generateShareUrl - userId: $userId, folderName: $folderName');
+      debugPrint('=== generateShareUrl START ===');
+      debugPrint('userId: "$userId"');
+      debugPrint('folderName: "$folderName"');
       
-      final base = baseUrl ?? (kIsWeb ? html.window.location.origin : 'https://gimie-launch.web.app');
-      debugPrint('Base URL: $base');
+      // SEMPRE usar URL fixa para garantir que funciona
+      String base = 'https://gimie-launch.web.app';
       
-      final encodedFolder = Uri.encodeComponent(folderName);
-      final encodedUser = Uri.encodeComponent(userId);
+      // Tentar pegar origin apenas se estiver em produção
+      if (kIsWeb && baseUrl == null) {
+        try {
+          final origin = html.window.location.origin;
+          if (origin.isNotEmpty && 
+              !origin.contains('localhost') && 
+              !origin.contains('127.0.0.1')) {
+            base = origin;
+            debugPrint('Using window origin: $origin');
+          } else {
+            debugPrint('Localhost detected, using fixed URL');
+          }
+        } catch (e) {
+          debugPrint('Could not get window origin: $e, using fixed URL');
+        }
+      } else if (baseUrl != null && baseUrl.isNotEmpty) {
+        base = baseUrl;
+        debugPrint('Using provided baseUrl: $baseUrl');
+      }
+      
+      debugPrint('Final base URL: $base');
+      
+      // Encode com segurança
+      String encodedFolder = folderName;
+      String encodedUser = userId;
+      
+      try {
+        encodedFolder = Uri.encodeComponent(folderName);
+      } catch (e) {
+        debugPrint('Error encoding folder, using fallback: $e');
+        encodedFolder = folderName.replaceAll(' ', '%20')
+                                  .replaceAll('#', '%23')
+                                  .replaceAll('&', '%26');
+      }
+      
+      try {
+        encodedUser = Uri.encodeComponent(userId);
+      } catch (e) {
+        debugPrint('Error encoding user, using fallback: $e');
+        encodedUser = userId.replaceAll(' ', '%20')
+                           .replaceAll('#', '%23')
+                           .replaceAll('&', '%26');
+      }
       
       final url = '$base/?shared=true&folder=$encodedFolder&user=$encodedUser';
-      debugPrint('Generated URL: $url');
+      debugPrint('=== FINAL URL: $url ===');
       
       return url;
-    } catch (e) {
-      debugPrint('Error in generateShareUrl: $e');
-      rethrow;
+    } catch (e, stack) {
+      debugPrint('=== CRITICAL ERROR ===');
+      debugPrint('Error: $e');
+      debugPrint('Stack: $stack');
+      
+      // FALLBACK: retornar URL básica válida
+      final safeUrl = 'https://gimie-launch.web.app/?shared=true&folder=${folderName.replaceAll(' ', '_')}&user=error';
+      debugPrint('Returning fallback URL: $safeUrl');
+      return safeUrl;
     }
   }
 }
