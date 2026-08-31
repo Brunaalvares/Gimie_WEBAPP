@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
-// Conditional import for web
-import 'dart:html' as html if (dart.library.io) 'dart:io';
+import 'dart:html' as html;
 
 /// Serviço para detectar e gerenciar acesso via links compartilhados
 class SharedLinkService {
@@ -150,10 +149,3 @@ class SharedLinkService {
   }
 }
 
-// Custom debug print for web
-void _debugPrint(String message) {
-  if (kIsWeb) {
-    // ignore: avoid_print
-    print('[SharedLinkService] $message');
-  }
-}

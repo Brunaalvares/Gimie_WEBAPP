@@ -84,29 +84,32 @@ class _FolderProductsScreenState extends State<FolderProductsScreen> {
       return;
     }
 
-    try {
-      // Gera a URL de compartilhamento
-      debugPrint('Gerando URL...');
-      final shareUrl = SharedLinkService.instance.generateShareUrl(
-        userId: userId,
-        folderName: widget.categoryName,
-      );
-      debugPrint('URL gerada: $shareUrl');
+    final shareUrl = SharedLinkService.instance.generateShareUrl(
+      userId: userId,
+      folderName: widget.categoryName,
+    );
+    debugPrint('URL gerada: $shareUrl');
 
-      // Mostra dialog com opção de copiar
-      if (context.mounted) {
-        await ShareLinkDialog.show(context, shareUrl);
-      }
+    if (!context.mounted) return;
+
+    try {
+      await ShareLinkDialog.show(context, shareUrl);
     } catch (e, stackTrace) {
-      debugPrint('Erro ao compartilhar: $e');
+      debugPrint('Erro ao abrir dialog: $e');
       debugPrint('Stack trace: $stackTrace');
-      
+
+      // Fallback: mostra o link no snackbar para cópia manual
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao gerar link: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
+            content: Text('Link: $shareUrl'),
+            duration: const Duration(seconds: 15),
+            action: SnackBarAction(
+              label: 'Copiar',
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: shareUrl));
+              },
+            ),
           ),
         );
       }
