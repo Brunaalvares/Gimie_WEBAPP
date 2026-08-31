@@ -41,7 +41,7 @@ class SharedLinkService {
         _sharedFolderId = uri.queryParameters['folder'];
         _sharedUserId = uri.queryParameters['user'] ?? uri.queryParameters['from'];
         
-        debugPrint('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
+        debugPrintWeb('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
       } else {
         _isSharedAccess = false;
       }

@@ -142,7 +142,6 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
       ],
     );
   }
-}
 
   /// Mostra o dialog de compartilhamento
   static Future<void> show(BuildContext context, String shareUrl) {
