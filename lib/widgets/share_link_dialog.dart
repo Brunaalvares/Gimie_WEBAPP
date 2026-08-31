@@ -10,6 +10,14 @@ class ShareLinkDialog extends StatefulWidget {
     required this.shareUrl,
   });
 
+  /// Mostra o dialog de compartilhamento
+  static Future<void> show(BuildContext context, String shareUrl) {
+    return showDialog(
+      context: context,
+      builder: (context) => ShareLinkDialog(shareUrl: shareUrl),
+    );
+  }
+
   @override
   State<ShareLinkDialog> createState() => _ShareLinkDialogState();
 }
@@ -140,14 +148,6 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
           ),
         ),
       ],
-    );
-  }
-
-  /// Mostra o dialog de compartilhamento
-  static Future<void> show(BuildContext context, String shareUrl) {
-    return showDialog(
-      context: context,
-      builder: (context) => ShareLinkDialog(shareUrl: shareUrl),
     );
   }
 }
