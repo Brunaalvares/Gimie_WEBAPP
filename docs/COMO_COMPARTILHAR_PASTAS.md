@@ -39,17 +39,25 @@ https://gimie.site/?shared=true&folder=Roupas%20de%20Ver%C3%A3o&user=abc123xyz
 
 1. **Pessoa clica no link compartilhado**
    - Abre o site Gimie no navegador
+   - Vê uma página bonita com header personalizado
 
-2. **Navega pela pasta compartilhada**
+2. **Vê o Header Atraente**
+   - 👤 **Foto do usuário** (ou iniciais se não tiver foto)
+   - 📝 **@username** do dono da pasta
+   - 📥 **Botão "Baixar Gimie"** destacado
+   - 🔐 **Botão "Entrar"** para quem já tem conta
+
+3. **Navega pela pasta compartilhada**
    - Vê todos os produtos da sua pasta
    - Pode visualizar imagens, preços e nomes
+   - Scroll suave com header que permanece visível
 
-3. **Clica em "Shop Now" em algum produto**
-   - 🚨 **BARREIRA APARECE!**
-   - Modal bonito aparece pedindo para baixar o app
+4. **Clica em "Shop Now" em algum produto** ou **"Baixar Gimie"**
+   - 🚨 **MODAL DE DOWNLOAD APARECE!**
+   - Modal bonito pedindo para baixar o app
    - Opções: App Store ou Play Store
 
-4. **Usuário baixa o app**
+5. **Usuário baixa o app**
    - Clica em um dos botões de download
    - É direcionado para a loja correspondente
    - Baixa o app Gimie completo
@@ -79,6 +87,13 @@ Esta mensagem confirma que o link está pronto para ser enviado.
 - **App Android**: URLs apontam para Play Store
 
 ## 🎨 Design
+
+### Header da Página Compartilhada
+- **Avatar circular** com foto do usuário ou iniciais
+- **@username** destacado em roxo
+- **Botão "Baixar Gimie"** grande e proeminente
+- **Botão "Entrar"** para usuários existentes
+- Header que permanece visível ao fazer scroll
 
 ### Botão no Perfil
 - Menu de três pontos (⋮)
@@ -140,11 +155,13 @@ Amigo Recebe Link
     ↓
 Clica e Abre no Navegador
     ↓
+Vê Página com Seu Avatar e @username 👤
+    ↓
 Vê Seus Produtos 👀
     ↓
-Quer Comprar → Clica "Shop Now"
-    ↓
-🚧 BARREIRA APARECE
+Opções:
+├─ Clica "Baixar Gimie" no header → 🚧 MODAL APARECE
+└─ Clica "Shop Now" em produto → 🚧 MODAL APARECE
     ↓
 "Baixe o App Gimie"
     ↓
