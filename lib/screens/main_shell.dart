@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'home_screen.dart';
 import 'add_product_screen.dart';
+import 'folder_products_screen.dart';
 import 'profile_screen.dart';
 import 'search_screen.dart';
+import '../models/product_model.dart';
+import '../services/firebase_service.dart';
 import '../services/share_service.dart';
+import '../services/shared_link_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
 
@@ -18,6 +22,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
   bool _checkedPendingShare = false;
+  bool _checkedPendingFolder = false;
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -30,9 +35,57 @@ class _MainShellState extends State<MainShell> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    if (!_checkedPendingFolder) {
+      _checkedPendingFolder = true;
+      _openPendingSharedFolder();
+    }
+
     if (_checkedPendingShare) return;
     _checkedPendingShare = true;
     _openAddScreenIfSharedContentExists();
+  }
+
+  /// Reabre a pasta que trouxe o usuário para o app.
+  ///
+  /// Fecha o ciclo do link compartilhado: o visitante viu a pasta no navegador,
+  /// baixou o app por causa dela e, ao entrar, volta exatamente para ela.
+  Future<void> _openPendingSharedFolder() async {
+    final sharedLink = SharedLinkService.instance;
+    final pending = await sharedLink.getPendingFolder();
+    if (pending == null || !mounted) return;
+
+    // Consome antes de abrir para não repetir em logins futuros.
+    await sharedLink.clearPendingFolder();
+
+    List<Product> folderProducts;
+    try {
+      final ownerProducts =
+          await FirebaseService().getUserProducts(pending.userId);
+
+      final normalizedTarget = pending.folderName.trim().toLowerCase();
+      folderProducts = ownerProducts.where((product) {
+        final category = (product.category ?? '').trim().toLowerCase();
+        return category == normalizedTarget;
+      }).toList();
+    } catch (e) {
+      debugPrint('Could not load pending shared folder: $e');
+      return;
+    }
+
+    if (folderProducts.isEmpty || !mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => FolderProductsScreen(
+            categoryName: pending.folderName,
+            products: folderProducts,
+          ),
+        ),
+      );
+    });
   }
 
   Future<void> _openAddScreenIfSharedContentExists() async {

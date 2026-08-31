@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart';
+import 'screens/shared_folder_screen.dart';
 import 'providers/product_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/scraping_provider.dart';
@@ -33,13 +34,36 @@ void main() async {
 
   // Initialize Shared Link Service
   try {
-    SharedLinkService.instance.initialize();
+    await SharedLinkService.instance.initialize();
     debugPrint('Shared Link Service initialized successfully');
   } catch (e) {
     debugPrint('Shared Link Service initialization error: $e');
   }
   
   runApp(const GimieApp());
+}
+
+/// Decide a primeira tela: quem chega por um link compartilhado vê a pasta
+/// direto, sem passar pelo onboarding nem pelo login.
+Widget _resolveInitialScreen() {
+  final sharedLink = SharedLinkService.instance;
+
+  if (sharedLink.isSharedAccess) {
+    final ownerId = sharedLink.sharedUserId;
+    final folderName = sharedLink.sharedFolderId;
+
+    if (ownerId != null &&
+        ownerId.isNotEmpty &&
+        folderName != null &&
+        folderName.isNotEmpty) {
+      return SharedFolderScreen(
+        ownerId: ownerId,
+        folderName: folderName,
+      );
+    }
+  }
+
+  return const SplashScreen();
 }
 
 class GimieApp extends StatelessWidget {
@@ -215,7 +239,7 @@ class GimieApp extends StatelessWidget {
             fillColor: Colors.white,
           ),
         ),
-        home: const SplashScreen(),
+        home: _resolveInitialScreen(),
       ),
     );
   }

@@ -1,5 +1,17 @@
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:html' as html;
+
+/// Pasta compartilhada guardada para ser reaberta depois do login.
+class PendingSharedFolder {
+  final String userId;
+  final String folderName;
+
+  const PendingSharedFolder({
+    required this.userId,
+    required this.folderName,
+  });
+}
 
 /// Serviço para detectar e gerenciar acesso via links compartilhados
 class SharedLinkService {
@@ -7,6 +19,9 @@ class SharedLinkService {
   static SharedLinkService get instance => _instance;
 
   SharedLinkService._internal();
+
+  static const String _pendingUserKey = 'pending_shared_user';
+  static const String _pendingFolderKey = 'pending_shared_folder';
 
   bool _isSharedAccess = false;
   String? _sharedFolderId;
@@ -22,7 +37,7 @@ class SharedLinkService {
   String? get sharedUserId => _sharedUserId;
 
   /// Inicializa o serviço verificando query parameters na URL
-  void initialize() {
+  Future<void> initialize() async {
     if (!kIsWeb) {
       _isSharedAccess = false;
       return;
@@ -41,6 +56,16 @@ class SharedLinkService {
         _sharedUserId = uri.queryParameters['user'] ?? uri.queryParameters['from'];
         
         debugPrint('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
+
+        // Guarda para reabrir a pasta depois que o visitante criar a conta.
+        final folderName = _sharedFolderId;
+        final ownerId = _sharedUserId;
+        if (folderName != null &&
+            folderName.isNotEmpty &&
+            ownerId != null &&
+            ownerId.isNotEmpty) {
+          await savePendingFolder(userId: ownerId, folderName: folderName);
+        }
       } else {
         _isSharedAccess = false;
       }
@@ -66,6 +91,53 @@ class SharedLinkService {
     _isSharedAccess = false;
     _sharedFolderId = null;
     _sharedUserId = null;
+  }
+
+  /// Guarda a pasta que originou o acesso para reabri-la após o login.
+  ///
+  /// Isso sustenta o deep link diferido: o visitante chega pelo link, baixa o
+  /// app e, ao entrar pela primeira vez, volta direto para esta pasta.
+  Future<void> savePendingFolder({
+    required String userId,
+    required String folderName,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_pendingUserKey, userId);
+      await prefs.setString(_pendingFolderKey, folderName);
+      debugPrint('Pending folder saved: $folderName (user: $userId)');
+    } catch (e) {
+      debugPrint('Could not save pending folder: $e');
+    }
+  }
+
+  /// Recupera a pasta pendente, ou null se não houver.
+  Future<PendingSharedFolder?> getPendingFolder() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString(_pendingUserKey);
+      final folderName = prefs.getString(_pendingFolderKey);
+
+      if (userId == null || userId.isEmpty) return null;
+      if (folderName == null || folderName.isEmpty) return null;
+
+      return PendingSharedFolder(userId: userId, folderName: folderName);
+    } catch (e) {
+      debugPrint('Could not read pending folder: $e');
+      return null;
+    }
+  }
+
+  /// Remove a pasta pendente para não reabrir em logins futuros.
+  Future<void> clearPendingFolder() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_pendingUserKey);
+      await prefs.remove(_pendingFolderKey);
+      debugPrint('Pending folder cleared');
+    } catch (e) {
+      debugPrint('Could not clear pending folder: $e');
+    }
   }
 
   /// Retorna a URL atual com os parâmetros de compartilhamento
