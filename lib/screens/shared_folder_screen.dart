@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:html' as html show document;
 import '../models/product_model.dart';
 import '../models/user_model.dart';
 import '../services/firebase_service.dart';
@@ -83,180 +81,63 @@ class _SharedFolderScreenState extends State<SharedFolderScreen> {
     await AppDownloadModal.show(context, productUrl: product.url);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Force viewport meta tag for mobile
-    if (kIsWeb) {
-      try {
-        final viewport = html.document.querySelector('meta[name="viewport"]');
-        if (viewport != null) {
-          viewport.setAttribute('content', 
-            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-        }
-      } catch (e) {
-        debugPrint('Could not set viewport: $e');
-      }
-    }
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAF9F6),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: Colors.white,
-            elevation: 2,
-            automaticallyImplyLeading: false,
-            expandedHeight: 160,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildHeaderContent(),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _buildBody(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderContent() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(20, 50, 20, 16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: const Color(0xFF8B7FB8),
-                backgroundImage: _owner?.photoUrl != null && _owner!.photoUrl!.isNotEmpty
-                    ? NetworkImage(_owner!.photoUrl!)
-                    : null,
-                child: _owner?.photoUrl == null || _owner!.photoUrl!.isEmpty
-                    ? Text(
-                        _getInitials(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 20,
-                        ),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.folderName,
-                      style: const TextStyle(
-                        fontFamily: 'Raleway',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
-                        color: Color(0xFF6B2C5C),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _getUsernameDisplay(),
-                      style: const TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 14,
-                        color: Color(0xFF8B7FB8),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => AppDownloadModal.show(context, productUrl: ''),
-                  icon: const Icon(Icons.download, size: 20),
-                  label: const Text('Baixar Gimie'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B7FB8),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton(
-                onPressed: _goToLogin,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                  side: const BorderSide(color: Color(0xFF8B7FB8)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Entrar',
-                  style: TextStyle(
-                    color: Color(0xFF8B7FB8),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getInitials() {
-    final owner = _owner;
-    if (owner == null) return '?';
-    
-    final name = owner.name.trim();
-    if (name.isNotEmpty) {
-      final parts = name.split(' ');
-      if (parts.length >= 2) {
-        return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-      }
-      return name[0].toUpperCase();
-    }
-    
-    final username = owner.username.trim();
-    if (username.isNotEmpty) {
-      return username[0].toUpperCase();
-    }
-    
-    return '?';
-  }
-
-  String _getUsernameDisplay() {
+  String get _ownerLabel {
     final owner = _owner;
     if (owner == null) return 'Pasta compartilhada';
-    
+
     final username = owner.username.trim();
     if (username.isNotEmpty) {
-      return '@$username';
+      return 'Pasta de @$username';
     }
-    
+
     final name = owner.name.trim();
     if (name.isNotEmpty) {
-      return name;
+      return 'Pasta de $name';
     }
-    
+
     return 'Pasta compartilhada';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAF9F6),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              widget.folderName,
+              style: const TextStyle(
+                fontFamily: 'Raleway',
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                color: Color(0xFF6B2C5C),
+              ),
+            ),
+            Text(
+              _ownerLabel,
+              style: const TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 12,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: _goToLogin,
+            child: const Text('Entrar'),
+          ),
+        ],
+      ),
+      body: _buildBody(),
+    );
   }
 
   /// Quem já tem conta entra direto. Como a pasta ficou salva como pendente,
@@ -269,50 +150,29 @@ class _SharedFolderScreenState extends State<SharedFolderScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const SizedBox(
-        height: 300,
-        child: Center(
-          child: CircularProgressIndicator(color: Color(0xFF8B7FB8)),
-        ),
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF8B7FB8)),
       );
     }
 
     if (_errorMessage != null) {
-      return Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-            const SizedBox(height: 12),
-            Text(
-              _errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontFamily: 'Roboto', color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadFolder,
-              child: const Text('Tentar novamente'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_products.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(24),
-        child: Center(
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.inventory_2_outlined, size: 48, color: Colors.grey),
-              SizedBox(height: 12),
+              const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+              const SizedBox(height: 12),
               Text(
-                'Esta pasta ainda não tem produtos',
+                _errorMessage!,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Roboto', color: Colors.grey),
+                style: const TextStyle(fontFamily: 'Roboto', color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadFolder,
+                child: const Text('Tentar novamente'),
               ),
             ],
           ),
@@ -320,18 +180,64 @@ class _SharedFolderScreenState extends State<SharedFolderScreen> {
       );
     }
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 0.72,
+    if (_products.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Esta pasta ainda não tem produtos',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontFamily: 'Roboto', color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        _buildDownloadBanner(),
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              childAspectRatio: 0.72,
+            ),
+            itemCount: _products.length,
+            itemBuilder: (context, index) => _buildProductCard(_products[index]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDownloadBanner() {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFF8B7FB8).withValues(alpha: 0.12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          const Icon(Icons.shopping_bag_outlined, color: Color(0xFF6B2C5C)),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Baixe o app Gimie para comprar estes produtos',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 13,
+                color: Color(0xFF6B2C5C),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => AppDownloadModal.show(context, productUrl: ''),
+            child: const Text('Baixar'),
+          ),
+        ],
       ),
-      itemCount: _products.length,
-      itemBuilder: (context, index) => _buildProductCard(_products[index]),
     );
   }
 
