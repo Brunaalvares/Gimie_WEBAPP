@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html show document;
 import '../models/product_model.dart';
 import '../models/user_model.dart';
 import '../services/firebase_service.dart';
@@ -83,6 +85,19 @@ class _SharedFolderScreenState extends State<SharedFolderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Force viewport meta tag for mobile
+    if (kIsWeb) {
+      try {
+        final viewport = html.document.querySelector('meta[name="viewport"]');
+        if (viewport != null) {
+          viewport.setAttribute('content', 
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        }
+      } catch (e) {
+        debugPrint('Could not set viewport: $e');
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFAF9F6),
       body: CustomScrollView(

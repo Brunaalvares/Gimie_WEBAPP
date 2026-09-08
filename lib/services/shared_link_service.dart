@@ -45,7 +45,24 @@ class SharedLinkService {
     }
 
     try {
-      final currentUrl = html.window.location.href;
+      // Múltiplas tentativas de pegar a URL (mobile pode demorar)
+      String? currentUrl;
+      for (var i = 0; i < 3; i++) {
+        try {
+          currentUrl = html.window.location.href;
+          if (currentUrl.isNotEmpty) break;
+        } catch (e) {
+          debugPrint('Attempt ${i + 1} to get URL failed: $e');
+          if (i < 2) await Future.delayed(const Duration(milliseconds: 100));
+        }
+      }
+
+      if (currentUrl == null || currentUrl.isEmpty) {
+        debugPrint('❌ Could not get URL after multiple attempts');
+        _isSharedAccess = false;
+        return;
+      }
+
       debugPrint('SharedLinkService: Checking URL: $currentUrl');
       
       final uri = Uri.parse(currentUrl);
@@ -60,12 +77,20 @@ class SharedLinkService {
       
       if (isShared) {
         _isSharedAccess = true;
-        _sharedFolderId = uri.queryParameters['folder'];
-        _sharedUserId = uri.queryParameters['user'] ?? uri.queryParameters['from'];
+        
+        // Decodifica os parâmetros (mobile pode encoding diferente)
+        final rawFolder = uri.queryParameters['folder'];
+        final rawUser = uri.queryParameters['user'] ?? uri.queryParameters['from'];
+        
+        _sharedFolderId = rawFolder;
+        _sharedUserId = rawUser;
         
         debugPrint('✅ Shared link detected!');
-        debugPrint('   - Folder: $_sharedFolderId');
-        debugPrint('   - User: $_sharedUserId');
+        debugPrint('   - Raw Folder param: $rawFolder');
+        debugPrint('   - Raw User param: $rawUser');
+        debugPrint('   - Decoded Folder: $_sharedFolderId');
+        debugPrint('   - Decoded User: $_sharedUserId');
+        debugPrint('   - User Agent: ${html.window.navigator.userAgent}');
 
         // Guarda para reabrir a pasta depois que o visitante criar a conta.
         final folderName = _sharedFolderId;
@@ -75,7 +100,9 @@ class SharedLinkService {
             ownerId != null &&
             ownerId.isNotEmpty) {
           await savePendingFolder(userId: ownerId, folderName: folderName);
-          debugPrint('   - Pending folder saved for after login');
+          debugPrint('   - ✅ Pending folder saved for after login');
+        } else {
+          debugPrint('   - ⚠️  Folder or User is empty!');
         }
       } else {
         _isSharedAccess = false;
