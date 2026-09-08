@@ -4,6 +4,7 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/shared_folder_screen.dart';
+import 'screens/landing_screen.dart';
 import 'providers/product_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/scraping_provider.dart';
@@ -43,8 +44,10 @@ void main() async {
   runApp(const GimieApp());
 }
 
-/// Decide a primeira tela: quem chega por um link compartilhado vê a pasta
-/// direto, sem passar pelo onboarding nem pelo login.
+/// Decide a primeira tela: 
+/// 1. Link compartilhado → SharedFolderScreen
+/// 2. Visitante (não logado) → LandingScreen
+/// 3. Usuário voltando → SplashScreen (vai para home ou login)
 Widget _resolveInitialScreen() {
   final sharedLink = SharedLinkService.instance;
 
@@ -53,6 +56,7 @@ Widget _resolveInitialScreen() {
   debugPrint('sharedUserId: ${sharedLink.sharedUserId}');
   debugPrint('sharedFolderId: ${sharedLink.sharedFolderId}');
 
+  // Se é um link compartilhado, mostra a pasta compartilhada
   if (sharedLink.isSharedAccess) {
     final ownerId = sharedLink.sharedUserId;
     final folderName = sharedLink.sharedFolderId;
@@ -71,13 +75,17 @@ Widget _resolveInitialScreen() {
         folderName: folderName,
       );
     } else {
-      debugPrint('❌ Shared link incomplete, showing SplashScreen');
+      debugPrint('❌ Shared link incomplete, showing LandingScreen');
+      return const LandingScreen();
     }
   } else {
-    debugPrint('❌ Not shared access, showing SplashScreen');
+    debugPrint('❌ Not shared access');
+    // Visitante chegando pela primeira vez → Landing Page
+    // Usuário voltando → Splash (que decide entre home ou login baseado em autenticação)
+    // Por enquanto, sempre mostramos Splash para manter comportamento atual
+    // TODO: Futuramente, detectar se é primeira visita e mostrar LandingScreen
+    return const SplashScreen();
   }
-
-  return const SplashScreen();
 }
 
 class GimieApp extends StatelessWidget {
