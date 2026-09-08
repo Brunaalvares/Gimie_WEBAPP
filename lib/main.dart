@@ -48,19 +48,33 @@ void main() async {
 Widget _resolveInitialScreen() {
   final sharedLink = SharedLinkService.instance;
 
+  debugPrint('=== Resolving Initial Screen ===');
+  debugPrint('isSharedAccess: ${sharedLink.isSharedAccess}');
+  debugPrint('sharedUserId: ${sharedLink.sharedUserId}');
+  debugPrint('sharedFolderId: ${sharedLink.sharedFolderId}');
+
   if (sharedLink.isSharedAccess) {
     final ownerId = sharedLink.sharedUserId;
     final folderName = sharedLink.sharedFolderId;
+
+    debugPrint('Checking shared link data...');
+    debugPrint('ownerId: $ownerId (isEmpty: ${ownerId?.isEmpty})');
+    debugPrint('folderName: $folderName (isEmpty: ${folderName?.isEmpty})');
 
     if (ownerId != null &&
         ownerId.isNotEmpty &&
         folderName != null &&
         folderName.isNotEmpty) {
+      debugPrint('✅ Showing SharedFolderScreen');
       return SharedFolderScreen(
         ownerId: ownerId,
         folderName: folderName,
       );
+    } else {
+      debugPrint('❌ Shared link incomplete, showing SplashScreen');
     }
+  } else {
+    debugPrint('❌ Not shared access, showing SplashScreen');
   }
 
   return const SplashScreen();

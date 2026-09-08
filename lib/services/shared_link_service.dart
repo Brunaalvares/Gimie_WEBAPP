@@ -40,11 +40,19 @@ class SharedLinkService {
   Future<void> initialize() async {
     if (!kIsWeb) {
       _isSharedAccess = false;
+      debugPrint('SharedLinkService: Not web platform, skipping');
       return;
     }
 
     try {
-      final uri = Uri.parse(html.window.location.href);
+      final currentUrl = html.window.location.href;
+      debugPrint('SharedLinkService: Checking URL: $currentUrl');
+      
+      final uri = Uri.parse(currentUrl);
+      
+      debugPrint('SharedLinkService: Query parameters: ${uri.queryParameters}');
+      debugPrint('SharedLinkService: Has shared? ${uri.queryParameters.containsKey('shared')}');
+      debugPrint('SharedLinkService: Has from? ${uri.queryParameters.containsKey('from')}');
       
       // Verifica se existe o parâmetro 'shared' ou 'from'
       final isShared = uri.queryParameters.containsKey('shared') || 
@@ -55,7 +63,9 @@ class SharedLinkService {
         _sharedFolderId = uri.queryParameters['folder'];
         _sharedUserId = uri.queryParameters['user'] ?? uri.queryParameters['from'];
         
-        debugPrint('Shared link detected - Folder: $_sharedFolderId, User: $_sharedUserId');
+        debugPrint('✅ Shared link detected!');
+        debugPrint('   - Folder: $_sharedFolderId');
+        debugPrint('   - User: $_sharedUserId');
 
         // Guarda para reabrir a pasta depois que o visitante criar a conta.
         final folderName = _sharedFolderId;
@@ -65,12 +75,15 @@ class SharedLinkService {
             ownerId != null &&
             ownerId.isNotEmpty) {
           await savePendingFolder(userId: ownerId, folderName: folderName);
+          debugPrint('   - Pending folder saved for after login');
         }
       } else {
         _isSharedAccess = false;
+        debugPrint('❌ No shared link detected - normal access');
       }
-    } catch (e) {
-      debugPrint('Error initializing SharedLinkService: $e');
+    } catch (e, stack) {
+      debugPrint('❌ Error initializing SharedLinkService: $e');
+      debugPrint('Stack: $stack');
       _isSharedAccess = false;
     }
   }
