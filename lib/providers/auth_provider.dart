@@ -372,7 +372,11 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> toggleFollowUser(UserModel targetUser) async {
     final currentUser = _currentUser;
-    if (currentUser == null) return false;
+    if (currentUser == null) {
+      _errorMessage = 'Você precisa estar logado para seguir usuários';
+      notifyListeners();
+      return false;
+    }
 
     try {
       final followingSet = currentUser.followingIds.toSet();
@@ -395,10 +399,12 @@ class AuthProvider extends ChangeNotifier {
       _currentUser = currentUser.copyWith(
         followingIds: followingSet.toList(),
       );
+      _errorMessage = null;
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = 'Erro ao atualizar usuários seguidos';
+      debugPrint('Erro no toggleFollowUser: $e');
+      _errorMessage = 'Erro ao atualizar: ${e.toString()}';
       notifyListeners();
       return false;
     }

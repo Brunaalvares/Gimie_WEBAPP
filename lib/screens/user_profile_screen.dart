@@ -106,14 +106,31 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     });
 
     if (!success) {
+      final errorMsg = authProvider.errorMessage ?? 'Não foi possível atualizar';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível atualizar este usuário'),
+        SnackBar(
+          content: Text(errorMsg),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
+
+    // Feedback de sucesso
+    final isNowFollowing = authProvider.currentUser?.followingIds.contains(_viewedUser.id) ?? false;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isNowFollowing 
+            ? 'Você agora segue @${_viewedUser.username}' 
+            : 'Você deixou de seguir @${_viewedUser.username}'
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
 
     await _loadData();
   }

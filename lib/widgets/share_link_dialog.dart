@@ -30,6 +30,9 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
       await Clipboard.setData(ClipboardData(text: widget.shareUrl));
       setState(() => _copied = true);
       
+      // Aguarda um momento para garantir que o clipboard foi atualizado
+      await Future.delayed(const Duration(milliseconds: 100));
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -37,20 +40,26 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
               children: [
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 8),
-                Text('Link copiado!'),
+                Expanded(
+                  child: Text('Link copiado! Cole em qualquer lugar para compartilhar'),
+                ),
               ],
             ),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } catch (e) {
+      debugPrint('Erro ao copiar para clipboard: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Não foi possível copiar automaticamente. Copie manualmente.'),
+          SnackBar(
+            content: Text('Erro ao copiar: ${e.toString()}\nSelecione e copie o link manualmente.'),
             backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
