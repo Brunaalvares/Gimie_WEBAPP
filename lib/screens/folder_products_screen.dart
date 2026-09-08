@@ -94,6 +94,7 @@ class _FolderProductsScreenState extends State<FolderProductsScreen> {
 
     try {
       await ShareLinkDialog.show(context, shareUrl);
+      debugPrint('ShareLinkDialog exibido com sucesso');
     } catch (e, stackTrace) {
       debugPrint('Erro ao abrir dialog: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -102,12 +103,33 @@ class _FolderProductsScreenState extends State<FolderProductsScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Link: $shareUrl'),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Erro ao abrir diálogo. Copie o link:'),
+                const SizedBox(height: 4),
+                Text(
+                  shareUrl,
+                  style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                ),
+              ],
+            ),
             duration: const Duration(seconds: 15),
+            behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'Copiar',
+              textColor: Colors.white,
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: shareUrl));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Link copiado!'),
+                    backgroundColor: Colors.green,
+                    behavior: SnackBarBehavior.floating,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
               },
             ),
           ),

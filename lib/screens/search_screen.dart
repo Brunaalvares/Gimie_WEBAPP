@@ -47,13 +47,30 @@ class _SearchScreenState extends State<SearchScreen> {
       _isSearchingUsers = true;
     });
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final users = await authProvider.searchUsersToFollow(trimmedQuery);
-    if (!mounted) return;
-    setState(() {
-      _userResults = users;
-      _isSearchingUsers = false;
-    });
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final users = await authProvider.searchUsersToFollow(trimmedQuery);
+      if (!mounted) return;
+      setState(() {
+        _userResults = users;
+        _isSearchingUsers = false;
+      });
+    } catch (e) {
+      debugPrint('Erro ao buscar usuários: $e');
+      if (!mounted) return;
+      setState(() {
+        _userResults = const [];
+        _isSearchingUsers = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao buscar usuários: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _onQueryChanged(String value) {

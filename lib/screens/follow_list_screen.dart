@@ -64,6 +64,8 @@ class _FollowListScreenState extends State<FollowListScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (_processingUserIds.contains(targetUser.id)) return;
 
+    final isFollowing = authProvider.currentUser?.followingIds.contains(targetUser.id) ?? false;
+
     setState(() {
       _processingUserIds.add(targetUser.id);
     });
@@ -76,14 +78,30 @@ class _FollowListScreenState extends State<FollowListScreen> {
     });
 
     if (!success) {
+      final errorMsg = authProvider.errorMessage ?? 'Não foi possível atualizar';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível atualizar esse usuário'),
+        SnackBar(
+          content: Text(errorMsg),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
     }
+
+    // Feedback de sucesso
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isFollowing 
+            ? 'Você deixou de seguir @${targetUser.username}' 
+            : 'Você agora segue @${targetUser.username}'
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
 
     _loadUsers();
   }
