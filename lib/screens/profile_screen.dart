@@ -385,23 +385,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
       debugPrint('Erro ao abrir dialog: $e');
       debugPrint('Stack trace: $stackTrace');
 
+      // Mostrar erro específico ao usuário
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+
       // Fallback: mostra o link no snackbar para cópia manual
       if (mounted) {
+        await Future.delayed(const Duration(seconds: 1));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Erro ao abrir diálogo. Copie o link:'),
+                const Text('Copie o link manualmente:'),
                 const SizedBox(height: 4),
-                Text(
+                SelectableText(
                   shareUrl,
-                  style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                  style: const TextStyle(fontSize: 11, color: Colors.white),
                 ),
               ],
             ),
             duration: const Duration(seconds: 15),
+            backgroundColor: const Color(0xFF8B7FB8),
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'Copiar',
